@@ -235,6 +235,15 @@ func GetTokenByIds(id int, userId int) (*Token, error) {
 	return &token, err
 }
 
+func GetUserTokenByName(userId int, name string) (*Token, error) {
+	if userId == 0 || strings.TrimSpace(name) == "" {
+		return nil, errors.New("userId 或 name 为空！")
+	}
+	token := Token{}
+	err := DB.Where("user_id = ? and name = ?", userId, name).Order("id desc").First(&token).Error
+	return &token, err
+}
+
 func GetTokenById(id int) (*Token, error) {
 	if id == 0 {
 		return nil, errors.New("id 为空！")

@@ -14,6 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const canvasRelayTokenName = "Infinite Canvas Desktop"
+
 func buildMaskedTokenResponse(token *model.Token) *model.Token {
 	if token == nil {
 		return nil
@@ -92,6 +94,67 @@ func GetTokenKey(c *gin.Context) {
 	common.ApiSuccess(c, gin.H{
 		"key": token.GetFullKey(),
 	})
+}
+
+func EnsureCanvasRelayToken(c *gin.Context) {
+	userId := c.GetInt("id")
+	token, ok := ensureCanvasRelayToken(c, userId)
+	if !ok {
+		return
+	}
+	common.ApiSuccess(c, canvasRelayTokenPayload(token))
+}
+
+func ensureCanvasRelayToken(c *gin.Context, userId int) (*model.Token, bool) {
+	if token, err := model.GetUserTokenByName(userId, canvasRelayTokenName); err == nil && token.Status == common.TokenStatusEnabled && (token.ExpiredTime == -1 || token.ExpiredTime >= common.GetTimestamp()) && (token.UnlimitedQuota || token.RemainQuota > 0) {
+		return token, true
+	}
+
+	maxTokens := operation_setting.GetMaxUserTokens()
+	count, err := model.CountUserTokens(userId)
+	if err != nil {
+		common.ApiError(c, err)
+		return nil, false
+	}
+	if int(count) >= maxTokens {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("已达到最大令牌数量限制 (%d)", maxTokens),
+		})
+		return nil, false
+	}
+
+	key, err := common.GenerateKey()
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgTokenGenerateFailed)
+		common.SysLog("failed to generate token key: " + err.Error())
+		return nil, false
+	}
+
+	token := model.Token{
+		UserId:             userId,
+		Name:               canvasRelayTokenName,
+		Key:                key,
+		CreatedTime:        common.GetTimestamp(),
+		AccessedTime:       common.GetTimestamp(),
+		ExpiredTime:        -1,
+		UnlimitedQuota:     true,
+		ModelLimitsEnabled: false,
+	}
+	if err := token.Insert(); err != nil {
+		common.ApiError(c, err)
+		return nil, false
+	}
+	return &token, true
+}
+
+func canvasRelayTokenPayload(token *model.Token) gin.H {
+	return gin.H{
+		"token_id":           token.Id,
+		"token_name":         token.Name,
+		"relay_ready":        true,
+		"relay_proxy_prefix": "/api/canvas/relay",
+	}
 }
 
 func GetTokenStatus(c *gin.Context) {

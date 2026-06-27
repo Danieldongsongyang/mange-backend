@@ -281,6 +281,20 @@ func SetApiRouter(router *gin.Engine) {
 			tokenRoute.POST("/batch", controller.DeleteTokenBatch)
 			tokenRoute.POST("/batch/keys", middleware.CriticalRateLimit(), middleware.DisableCache(), controller.GetTokenKeysBatch)
 		}
+		apiRouter.POST("/canvas/relay-token", middleware.UserAuth(), controller.EnsureCanvasRelayToken)
+		canvasRelayRoute := apiRouter.Group("/canvas/relay")
+		canvasRelayRoute.Use(middleware.UserAuth(), controller.CanvasRelayAuth(), controller.CanvasRelayRewritePath(), middleware.ModelRequestRateLimit())
+		{
+			canvasRelayRoute.POST("/chat/completions", middleware.Distribute(), controller.CanvasRelayOpenAI)
+			canvasRelayRoute.POST("/images/generations", middleware.Distribute(), controller.CanvasRelayOpenAI)
+			canvasRelayRoute.POST("/images/edits", middleware.Distribute(), controller.CanvasRelayOpenAI)
+			canvasRelayRoute.POST("/audio/speech", middleware.Distribute(), controller.CanvasRelayOpenAI)
+			canvasRelayRoute.POST("/responses", middleware.Distribute(), controller.CanvasRelayOpenAI)
+			canvasRelayRoute.POST("/responses/compact", middleware.Distribute(), controller.CanvasRelayOpenAI)
+			canvasRelayRoute.POST("/videos", middleware.Distribute(), controller.CanvasRelayTask)
+			canvasRelayRoute.GET("/videos/:task_id", middleware.Distribute(), controller.CanvasRelayTaskFetch)
+			canvasRelayRoute.GET("/videos/:task_id/content", controller.CanvasRelayVideoContent)
+		}
 
 		usageRoute := apiRouter.Group("/usage")
 		usageRoute.Use(middleware.CORS(), middleware.CriticalRateLimit())
