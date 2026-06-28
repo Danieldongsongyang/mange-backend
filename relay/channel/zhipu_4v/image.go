@@ -1,8 +1,10 @@
 package zhipu_4v
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/dto"
@@ -52,6 +54,72 @@ type openAIImagePayload struct {
 
 type openAIImageData struct {
 	B64Json string `json:"b64_json"`
+}
+
+func oaiImage2ZhipuImageRequest(request dto.ImageRequest) zhipuImageRequest {
+	imageRequest := zhipuImageRequest{
+		Model:   request.Model,
+		Prompt:  request.Prompt,
+		Quality: normalizeZhipuImageQuality(request.Quality),
+		Size:    normalizeZhipuImageSize(request.Size),
+	}
+	if imageRequest.Model == "" {
+		imageRequest.Model = "glm-image"
+	}
+	if request.WatermarkEnabled != nil {
+		var enabled bool
+		if err := json.Unmarshal(request.WatermarkEnabled, &enabled); err == nil {
+			imageRequest.WatermarkEnabled = &enabled
+		}
+	}
+	if request.Watermark != nil {
+		imageRequest.WatermarkEnabled = request.Watermark
+	}
+	if request.UserId != nil {
+		var userID string
+		if err := json.Unmarshal(request.UserId, &userID); err == nil {
+			imageRequest.UserID = userID
+		}
+	}
+	if request.User != nil {
+		var userID string
+		if err := json.Unmarshal(request.User, &userID); err == nil {
+			imageRequest.UserID = userID
+		}
+	}
+	return imageRequest
+}
+
+func normalizeZhipuImageQuality(quality string) string {
+	switch strings.ToLower(strings.TrimSpace(quality)) {
+	case "", "auto", "hd", "high", "4k":
+		return "hd"
+	default:
+		return "hd"
+	}
+}
+
+func normalizeZhipuImageSize(size string) string {
+	switch strings.TrimSpace(size) {
+	case "", "auto":
+		return "1280x1280"
+	case "1024x1024":
+		return "1280x1280"
+	case "1824x1024", "1792x1024", "1728x972":
+		return "1728x960"
+	case "1024x1824", "1024x1792", "972x1728":
+		return "960x1728"
+	case "1360x1024", "1152x864":
+		return "1472x1088"
+	case "1024x1360", "864x1152":
+		return "1088x1472"
+	case "1440x1024", "1536x1024":
+		return "1568x1056"
+	case "1024x1440", "1024x1536":
+		return "1056x1568"
+	default:
+		return strings.TrimSpace(size)
+	}
 }
 
 func zhipu4vImageHandler(c *gin.Context, resp *http.Response, info *relaycommon.RelayInfo) (*dto.Usage, *types.NewAPIError) {

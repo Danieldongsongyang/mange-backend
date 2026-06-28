@@ -37,7 +37,10 @@ func (a *Adaptor) ConvertAudioRequest(c *gin.Context, info *relaycommon.RelayInf
 }
 
 func (a *Adaptor) ConvertImageRequest(c *gin.Context, info *relaycommon.RelayInfo, request dto.ImageRequest) (any, error) {
-	return request, nil
+	if info.RelayMode != relayconstant.RelayModeImagesGenerations {
+		return nil, fmt.Errorf("glm-image only supports text-to-image generation; unsupported image relay mode: %d", info.RelayMode)
+	}
+	return oaiImage2ZhipuImageRequest(request), nil
 }
 
 func (a *Adaptor) Init(info *relaycommon.RelayInfo) {
@@ -68,6 +71,8 @@ func (a *Adaptor) GetRequestURL(info *relaycommon.RelayInfo) (string, error) {
 				return fmt.Sprintf("%s/images/generations", specialPlan.OpenAIBaseURL), nil
 			}
 			return fmt.Sprintf("%s/api/paas/v4/images/generations", baseURL), nil
+		case relayconstant.RelayModeImagesEdits:
+			return "", errors.New("glm-image only supports text-to-image generation")
 		default:
 			if hasSpecialPlan && specialPlan.OpenAIBaseURL != "" {
 				return fmt.Sprintf("%s/chat/completions", specialPlan.OpenAIBaseURL), nil
