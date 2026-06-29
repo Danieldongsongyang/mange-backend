@@ -14,7 +14,11 @@ RUN arch="$(dpkg --print-architecture)" \
   && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz" -o /tmp/go.tgz \
   && rm -rf /usr/local/go \
   && tar -C /usr/local -xzf /tmp/go.tgz \
-  && rm /tmp/go.tgz
+  && rm /tmp/go.tgz \
+  # Login shells inside the sandbox can reset PATH and drop /usr/local/go/bin.
+  # Mirror the executables into /usr/local/bin so hook commands still find Go.
+  && ln -sf /usr/local/go/bin/go /usr/local/bin/go \
+  && ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Install GitHub CLI
