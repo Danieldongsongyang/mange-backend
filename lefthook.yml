@@ -1,0 +1,23 @@
+glob_matcher: doublestar
+
+pre-commit:
+  parallel: false
+  jobs:
+    - name: gofmt-staged
+      glob: "**/*.go"
+      run: scripts/lefthook-gofmt.sh {staged_files}
+      stage_fixed: true
+
+    - name: go-vet-affected-packages
+      glob: "**/*.go"
+      run: scripts/lefthook-go-packages.sh vet {staged_files}
+
+    - name: go-test-affected-packages
+      glob: "**/*.go"
+      run: scripts/lefthook-go-packages.sh test {staged_files}
+
+pre-push:
+  parallel: false
+  jobs:
+    - name: go-test-all
+      run: go test ./...

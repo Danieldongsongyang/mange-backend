@@ -10,7 +10,7 @@ DEV_POSTGRES_DB = new-api
 DEV_POSTGRES_USER = root
 DEV_SQLITE_PATH ?= one-api.db
 
-.PHONY: all build-frontend build-frontend-classic build-all-frontends start-backend dev dev-api dev-api-rebuild dev-web dev-web-classic reset-setup
+.PHONY: all build-frontend build-frontend-classic build-all-frontends start-backend dev dev-api dev-api-rebuild dev-web dev-web-classic reset-setup hooks-install hooks-run-pre-commit
 
 all: build-all-frontends start-backend
 
@@ -94,3 +94,11 @@ reset-setup:
 		echo "Start the dev stack with 'make dev-api', or set SQLITE_PATH/DEV_SQLITE_PATH to your local SQLite database."; \
 		exit 1; \
 	fi
+
+hooks-install:
+	@echo "Installing Lefthook hooks..."
+	@lefthook install
+
+hooks-run-pre-commit:
+	@echo "Running Lefthook pre-commit checks..."
+	@lefthook run pre-commit
