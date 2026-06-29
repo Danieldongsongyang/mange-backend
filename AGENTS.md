@@ -135,3 +135,5 @@ For request structs that are parsed from client JSON and then re-marshaled to up
 ### Rule 7: Billing Expression System — Read `pkg/billingexpr/expr.md`
 
 When working on tiered/dynamic billing (expression-based pricing), you MUST read `pkg/billingexpr/expr.md` first. It documents the design philosophy, expression language (variables, functions, examples), full system architecture (editor → storage → pre-consume → settlement → log display), token normalization rules (`p`/`c` auto-exclusion), quota conversion, and expression versioning. All code changes to the billing expression system must follow the patterns described in that document.
+
+## /Users/a1/Desktop/mange-backend/router/api-router.go  承接的请求  由   /Users/a1/Desktop/my-canvas/ 项目发来   
