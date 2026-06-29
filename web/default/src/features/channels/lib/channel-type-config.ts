@@ -134,6 +134,19 @@ export const CHANNEL_TYPE_CONFIGS: Record<number, ChannelTypeConfig> = {
       baseUrl: 'Default: https://api.replicate.com',
     },
   },
+  58: {
+    id: 58,
+    name: CHANNEL_TYPES[58],
+    icon: 'openai',
+    defaultBaseUrl: 'https://apihub.agnes-ai.com',
+    hints: {
+      baseUrl:
+        'Default: https://apihub.agnes-ai.com (SDK base URL uses /v1)',
+      key: 'AgnesAI API Key',
+      models:
+        'agnes-2.0-flash,agnes-1.5-flash,agnes-image-2.1-flash',
+    },
+  },
 }
 
 /**

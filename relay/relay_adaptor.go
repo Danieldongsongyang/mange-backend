@@ -5,6 +5,7 @@ import (
 
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/relay/channel"
+	"github.com/QuantumNous/new-api/relay/channel/agnesai"
 	"github.com/QuantumNous/new-api/relay/channel/ali"
 	"github.com/QuantumNous/new-api/relay/channel/aws"
 	"github.com/QuantumNous/new-api/relay/channel/baidu"
@@ -120,6 +121,8 @@ func GetAdaptor(apiType int) channel.Adaptor {
 		return &replicate.Adaptor{}
 	case constant.APITypeCodex:
 		return &codex.Adaptor{}
+	case constant.APITypeAgnesAI:
+		return &agnesai.Adaptor{}
 	}
 	return nil
 }
@@ -153,7 +156,7 @@ func GetTaskAdaptor(platform constant.TaskPlatform) channel.TaskAdaptor {
 			return &taskVidu.TaskAdaptor{}
 		case constant.ChannelTypeDoubaoVideo, constant.ChannelTypeVolcEngine:
 			return &taskdoubao.TaskAdaptor{}
-		case constant.ChannelTypeSora, constant.ChannelTypeOpenAI:
+		case constant.ChannelTypeSora, constant.ChannelTypeOpenAI, constant.ChannelTypeAgnesAI:
 			return &tasksora.TaskAdaptor{}
 		case constant.ChannelTypeGemini:
 			return &taskGemini.TaskAdaptor{}
