@@ -1,0 +1,11 @@
+model_provider = "mylocalhost"
+model = "gpt-5.4"
+
+[model_providers.mylocalhost]
+name = "mylocalhost API"
+base_url = "http://host.docker.internal:57927/v1"
+wire_api = "responses"
+env_key = "My_Localhost_API_Key"
+
+[projects."/home/agent/workspace"]
+trust_level = "trusted"
