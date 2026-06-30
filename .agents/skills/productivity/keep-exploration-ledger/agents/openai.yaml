@@ -1,0 +1,7 @@
+interface:
+  display_name: "连续探索账本"
+  short_description: "维护跨窗口延续的探索账本"
+  default_prompt: "使用 $keep-exploration-ledger 为这次探索创建或更新一份聚焦的 Markdown 连续探索账本。"
+
+policy:
+  allow_implicit_invocation: false
